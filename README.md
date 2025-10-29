@@ -14,7 +14,9 @@ Web scraper for collecting teacher attendance data from Delhi Education Departme
 
 **Output columns:** school_id, school_name, employee_id, employee_name, attendance_status
 
-## Quick Start
+## Quick Start 
+
+(Clone github repo from https://github.com/Virum9520/school-attendance-scraper.git)
 
 1. **Install dependencies:**
 
