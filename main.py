@@ -7,7 +7,11 @@ from pipeline.parse_attendance import parse_attendance_data
 from pipeline.save_data import save_to_excel
 import config
 
-#Mapping of attendance types
+BASE_URL = "https://edudel.nic.in/mis/eis/Attendance/frmAttendanceSecondPageHome.aspx"
+OUTPUT_DIR = 'data'
+TIMEOUT = 10
+REQUEST_DELAY = 1
+
 ATTENDANCE_DISPLAY_NAMES = {
     'Pre1': 'Present',
     'OD1': 'On Duty',
@@ -41,43 +45,42 @@ def main():
         
         school_records = []
         
-        for att_type in config.ATTENDANCE_TYPES:
+        for att_type in ATTENDANCE_DISPLAY_NAMES.keys():
             display_name = ATTENDANCE_DISPLAY_NAMES.get(att_type, att_type)
             print(f"Fetching {display_name}...")
             
-            # Step 1: Fetch HTML
+            # Step 1 Fetch HTML from link
             html = fetch_attendance_html(
-                base_url=config.BASE_URL,
+                base_url=BASE_URL,
                 atttype=att_type,
-                dat=config.DAT,
+                dat=config.DATE,
                 name=school,
                 dis=school_code,
-                timeout=config.TIMEOUT,
-                delay=config.REQUEST_DELAY
-            )
-            
+                timeout=TIMEOUT,
+                delay=REQUEST_DELAY
+            )            
             if not html:
-                print(f"  ✗ Failed to fetch {att_type}")
+                print(f"Failed to fetch {att_type}")
                 continue
             
-            # Step 2: Parse data
+            # Step 2 Parsing HTML data
             records = parse_attendance_data(html, att_type)
             
             if records:
-                print(f"  ✓ Found {len(records)} records")
+                print(f"  Found {len(records)} records")
                 school_records.extend(records)
             else:
-                print(f"  0 records present")
+                print("0 records present")
         
-        # Step 3: Save to Excel
+        # Step 3 Saving to Excel
         if school_records:
             print(f"\nSaving {len(school_records)} records for this school...")
-            save_to_excel(school_records, config.OUTPUT_DIR, school_name, config.DAT)
+            save_to_excel(school_records, OUTPUT_DIR, school_name, config.DATE)
             
-            print(f"✓ Saved to {config.OUTPUT_DIR}/{school_name}_{config.DAT}.xlsx")
+            print(f"Saved to {OUTPUT_DIR}/{school_name}_{config.DATE}.xlsx")
             total_files_saved += 1
 
-    print(f"✓ Successfully created {total_files_saved} Excel file")
+    print(f"Successfully created {total_files_saved} Excel file")
 
 if __name__ == "__main__":
     main()
